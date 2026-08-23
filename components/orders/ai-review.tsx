@@ -107,7 +107,7 @@ export function AIReview({ orderId }: { orderId: string }) {
 
   if (!data) {
     return (
-      <div className="space-y-3 p-4">
+      <div className="min-h-0 flex-1 space-y-3 overflow-auto p-4">
         <Skeleton className="h-24 rounded-lg" />
         <Skeleton className="h-64 rounded-lg" />
       </div>

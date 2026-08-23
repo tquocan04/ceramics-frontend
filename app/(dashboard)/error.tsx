@@ -17,7 +17,7 @@ export default function DashboardError({
   retry: () => void
 }) {
   return (
-    <div className="grid flex-1 place-items-center p-8">
+    <div className="grid min-h-0 flex-1 place-items-center overflow-auto p-8">
       <div className="max-w-md space-y-3 text-center">
         <h2 className="text-base font-semibold">Có lỗi xảy ra</h2>
         <p className="text-muted-foreground text-sm leading-relaxed">

@@ -30,7 +30,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={cn("h-full", "antialiased", inter.variable, geistMono.variable)}
     >
-      <body className="bg-background text-foreground min-h-full font-sans">
+      {/* A definite height plus overflow-hidden makes the document itself
+          incapable of scrolling: the viewport is the frame, and scrolling
+          happens inside the panes. Safe while every route lives in the
+          dashboard shell — revisit if a scrolling page is added outside it. */}
+      <body className="bg-background text-foreground h-full overflow-hidden font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

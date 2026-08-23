@@ -10,7 +10,10 @@ import { StreamProvider } from "@/components/layout/stream-provider"
 export default function DashboardLayout({ children }: LayoutProps<"/">) {
   return (
     <StreamProvider>
-      <div className="flex h-svh overflow-hidden">
+      {/* h-full, not h-svh: a percentage of body's definite height can never
+          exceed its parent, where a viewport unit does not subtract a classic
+          scrollbar and ends up fighting one. */}
+      <div className="flex h-full overflow-hidden">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">{children}</div>
         <EventRail />

@@ -66,7 +66,7 @@ export function BatchDetail({ batchId }: { batchId: string }) {
 
   if (!data) {
     return (
-      <div className="grid gap-4 p-4 lg:grid-cols-[1fr_20rem]">
+      <div className="grid min-h-0 flex-1 gap-4 overflow-auto p-4 lg:grid-cols-[1fr_20rem]">
         <Skeleton className="h-96 rounded-lg" />
         <Skeleton className="h-96 rounded-lg" />
       </div>

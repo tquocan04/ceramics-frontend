@@ -219,7 +219,9 @@ export function FlowBoard() {
 
   if (!data) {
     return (
-      <div className="space-y-4 p-4">
+      // Same scroll ownership as the loaded board: the skeleton column row is
+      // ~1560px wide and would otherwise push the layout on every refetch.
+      <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-16 rounded-lg" />

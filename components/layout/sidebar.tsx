@@ -51,7 +51,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3">
+      <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active =
             pathname === href || (href !== "/board" && pathname.startsWith(href))
