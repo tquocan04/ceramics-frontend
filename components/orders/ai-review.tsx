@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ESTIMATED_FIELDS, EXTRACTED_FIELDS } from "@/lib/ai/labels"
 import { ApiRequestError } from "@/lib/api/client"
 import {
   analyzeOrder,
@@ -56,31 +57,6 @@ import type {
   AIExtractedData,
 } from "@/lib/domain/types"
 import { cn } from "@/lib/utils"
-
-const EXTRACTED_FIELDS: Array<{
-  key: keyof AIExtractedData
-  label: string
-  unit?: string
-}> = [
-  { key: "product_name", label: "Tên sản phẩm" },
-  { key: "quantity", label: "Số lượng", unit: "sp" },
-  { key: "height_cm", label: "Chiều cao", unit: "cm" },
-  { key: "width_cm", label: "Chiều rộng", unit: "cm" },
-  { key: "decoration_pattern", label: "Họa tiết" },
-  { key: "glaze_type", label: "Loại men" },
-  { key: "firing_temperature_c", label: "Nhiệt độ nung", unit: "°C" },
-  { key: "deadline_days", label: "Thời hạn", unit: "ngày" },
-]
-
-const ESTIMATED_FIELDS: Array<{
-  key: keyof AIEstimatedData
-  label: string
-  unit: string
-}> = [
-  { key: "clay_kg", label: "Đất sét ước tính", unit: "kg" },
-  { key: "glaze_kg", label: "Men ước tính", unit: "kg" },
-  { key: "firing_duration_hours", label: "Thời gian nung", unit: "giờ" },
-]
 
 export function AIReview({ orderId }: { orderId: string }) {
   const router = useRouter()
