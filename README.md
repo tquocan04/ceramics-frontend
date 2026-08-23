@@ -14,6 +14,20 @@ Mẻ sản xuất  →  FORMING → DRYING → DECORATING → GLAZING → FIRING
                                                                                   └─ FAIL → REWORK / BLOCKED
 ```
 
+> [!IMPORTANT]
+> **Working branch — `demo/ceremic-manifacture-automation-pipeline`.**
+>
+> All application code lives on that branch. `main` carries this README and the original
+> scaffold only, so cloning and staying on `main` will **not** give you a runnable app.
+>
+> ```bash
+> git clone https://github.com/quanpham8899/de-tai-2-frontend.git
+> cd de-tai-2-frontend
+> git switch demo/ceremic-manifacture-automation-pipeline
+> ```
+>
+> Every instruction below assumes you are on that branch.
+
 > **This repo currently ships its own mock backend.** Every screen talks HTTP to route handlers
 > under `app/api/*` backed by an in-memory store. See [Backend integration](#backend-integration)
 > — swapping in a real service is one environment variable.
