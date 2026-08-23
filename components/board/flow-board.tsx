@@ -219,36 +219,53 @@ export function FlowBoard() {
 
   if (!data) {
     return (
-      // Same scroll ownership as the loaded board: the skeleton column row is
-      // ~1560px wide and would otherwise push the layout on every refetch.
-      <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-lg" />
-          ))}
+      // Same three-band shape as the loaded board, so nothing jumps when data
+      // arrives. The ~1560px skeleton row lives inside the scroller, not the
+      // outer column.
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 px-4 pt-4 pb-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-lg" />
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} className="h-72 w-[13.5rem] shrink-0 rounded-lg" />
-          ))}
+        <div className="min-h-0 min-w-0 flex-1 overflow-auto px-4 pb-4">
+          <div className="flex gap-2">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                className="h-72 w-[13.5rem] shrink-0 rounded-lg"
+              />
+            ))}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
+    // Three bands: a pinned KPI strip, the Kanban (the only scroller), and the
+    // pinned rework dock. min-w-0 is what stops the ~1750px board from widening
+    // its ancestors — without it the strip and the dock would scroll sideways
+    // along with the columns.
     <div
-      className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-4"
+      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
       onDragEnd={() => {
         setDragTarget(null)
         setDraggingStage(null)
       }}
     >
-      <KpiStrip summary={data.summary} />
+      <div className="shrink-0 px-4 pt-4 pb-3">
+        <KpiStrip summary={data.summary} />
+      </div>
 
+      {/* LayoutGroup wraps both the scroller and the dock: their cards share
+          layoutId, so a batch failing into the tray morphs across the two. It
+          renders no DOM, so the banding above is unaffected. */}
       <LayoutGroup>
         <div
-          className="flex items-start"
+          className="min-h-0 min-w-0 flex-1 overflow-auto px-4 pb-4"
           onDragStart={(e) => {
             const id = (e.target as HTMLElement)?.getAttribute?.(
               "data-dragging-id"
@@ -257,42 +274,46 @@ export function FlowBoard() {
             setDraggingStage(batch?.current_stage ?? null)
           }}
         >
-          {STAGE_SEQUENCE.map((stage, i) => {
-            const column = columns.find((c) => c.stage === stage)
-            const next = STAGE_SEQUENCE[i + 1]
+          {/* min-h-full so columns fill the region when short, and stretch
+              together when one of them is tall. */}
+          <div className="flex min-h-full items-stretch">
+            {STAGE_SEQUENCE.map((stage, i) => {
+              const column = columns.find((c) => c.stage === stage)
+              const next = STAGE_SEQUENCE[i + 1]
 
-            return (
-              <div key={stage} className="flex items-stretch">
-                <StageColumn
-                  stage={stage}
-                  batches={column?.batches ?? []}
-                  now={now}
-                  busyId={busyId}
-                  rejectedId={rejectedId}
-                  dropHint={dropHintFor(stage)}
-                  onCommand={runCommand}
-                  onFail={handleFail}
-                  onDrop={handleDrop}
-                  onDragOverStage={setDragTarget}
-                />
+              return (
+                <div key={stage} className="flex items-stretch">
+                  <StageColumn
+                    stage={stage}
+                    batches={column?.batches ?? []}
+                    now={now}
+                    busyId={busyId}
+                    rejectedId={rejectedId}
+                    dropHint={dropHintFor(stage)}
+                    onCommand={runCommand}
+                    onFail={handleFail}
+                    onDrop={handleDrop}
+                    onDragOverStage={setDragTarget}
+                  />
 
-                {next && stage === STAGE_TYPE.QUALITY_CHECK ? (
-                  <QCFork
-                    intensity={intensity.get(stage) ?? 0}
-                    pulseKey={pulses[stage] || null}
-                    failPulseKey={pulses["QC_FAIL"] || null}
-                  />
-                ) : next ? (
-                  <FlowConnector
-                    from={stage}
-                    to={next}
-                    intensity={intensity.get(stage) ?? 0}
-                    pulseKey={pulses[stage] || null}
-                  />
-                ) : null}
-              </div>
-            )
-          })}
+                  {next && stage === STAGE_TYPE.QUALITY_CHECK ? (
+                    <QCFork
+                      intensity={intensity.get(stage) ?? 0}
+                      pulseKey={pulses[stage] || null}
+                      failPulseKey={pulses["QC_FAIL"] || null}
+                    />
+                  ) : next ? (
+                    <FlowConnector
+                      from={stage}
+                      to={next}
+                      intensity={intensity.get(stage) ?? 0}
+                      pulseKey={pulses[stage] || null}
+                    />
+                  ) : null}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <ReworkTray batches={data.rework} now={now} onResolved={load} />

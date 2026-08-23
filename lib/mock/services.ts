@@ -784,10 +784,19 @@ export function dashboardKanban(nowMs = Date.now()): {
 } {
   const views = listBatchViews(nowMs)
 
-  const rework = views.filter(
-    (v) =>
-      v.status === BATCH_STATUS.BLOCKED || v.status === BATCH_STATUS.REWORK_REQUIRED
-  )
+  // Newest first. A blocked batch is not mutated further, so updated_at is
+  // effectively when it entered the queue. Ordering here rather than in the UI
+  // keeps the board dock and /rework agreeing, and guarantees a freshly failed
+  // batch is always the first tile — which is what gives it a morph target in
+  // the dock's capped grid.
+  const rework = views
+    .filter(
+      (v) =>
+        v.status === BATCH_STATUS.BLOCKED ||
+        v.status === BATCH_STATUS.REWORK_REQUIRED
+    )
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+
   const reworkIds = new Set(rework.map((v) => v.id))
 
   const active = views.filter(

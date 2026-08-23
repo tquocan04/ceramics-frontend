@@ -6,6 +6,8 @@ import {
   FlaskConical,
   Gauge,
   Moon,
+  PanelRightClose,
+  PanelRightOpen,
   Pause,
   Play,
   RotateCcw,
@@ -27,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useShell } from "@/components/layout/shell-provider"
 import { useStream } from "@/components/layout/stream-provider"
 import { getSimConfig, setSim, type SimConfig } from "@/lib/api/endpoints"
 import { cn } from "@/lib/utils"
@@ -64,8 +67,33 @@ export function Topbar({ title }: { title: string }) {
 
         <SimulatorControls />
         <ThemeToggle />
+        <RailToggle />
       </div>
     </header>
+  )
+}
+
+/**
+ * Fourth and last control. Gated to xl because the rail itself is `hidden
+ * xl:flex` — below that there is nothing to toggle, and /events is the way to
+ * the feed.
+ */
+function RailToggle() {
+  const { railOpen, toggleRail } = useShell()
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      className="hidden xl:inline-flex"
+      onClick={toggleRail}
+      title={
+        railOpen ? "Ẩn bảng hoạt động realtime" : "Hiện bảng hoạt động realtime"
+      }
+    >
+      {railOpen ? <PanelRightClose /> : <PanelRightOpen />}
+      <span className="sr-only">Bật/tắt bảng hoạt động</span>
+    </Button>
   )
 }
 

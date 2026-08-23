@@ -6,6 +6,7 @@ import {
   ClipboardList,
   LayoutGrid,
   Plus,
+  Recycle,
   ScrollText,
   Send,
 } from "lucide-react"
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils"
 const NAV = [
   { href: "/board", label: "Bảng sản xuất", icon: LayoutGrid },
   { href: "/orders", label: "Đơn hàng", icon: ClipboardList },
+  { href: "/rework", label: "Mẻ cần xử lý", icon: Recycle },
   { href: "/events", label: "Nhật ký sự kiện", icon: ScrollText },
   { href: "/notifications", label: "Thông báo", icon: Send },
 ] as const

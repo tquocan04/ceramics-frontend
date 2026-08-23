@@ -13,6 +13,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Activity, ChevronRight } from "lucide-react"
 
 import { EventDot, EVENT_IS_ALERT } from "@/components/events/event-dot"
+import { useShell } from "@/components/layout/shell-provider"
 import { useStream } from "@/components/layout/stream-provider"
 import { Skeleton } from "@/components/ui/skeleton"
 import { listEvents } from "@/lib/api/endpoints"
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils"
 
 export function EventRail() {
   const { events: streamed, connection } = useStream()
+  const { railOpen } = useShell()
   const [initial, setInitial] = useState<WorkflowEvent[] | null>(null)
 
   useEffect(() => {
@@ -37,6 +39,11 @@ export function EventRail() {
     const backfill = (initial ?? []).filter((e) => !seen.has(e.id))
     return [...streamed, ...backfill].slice(0, 80)
   }, [streamed, initial])
+
+  // Checked after every hook so the hook order stays stable. Staying mounted
+  // is not an option worth paying for here — unmounting keeps the board from
+  // reflowing against a hidden 320px column.
+  if (!railOpen) return null
 
   return (
     <aside className="border-border bg-sidebar/40 hidden w-80 shrink-0 flex-col border-l xl:flex">

@@ -40,7 +40,10 @@ export function FlowConnector({ from, to, intensity, pulseKey }: Props) {
 
   return (
     <div
-      className="relative flex w-10 shrink-0 items-center self-stretch pt-11"
+      // items-start + pt-11 (matching the h-11 column header) pins the rail to
+      // the top of the column body, level with the first card and stable no
+      // matter how tall the column grows. QCFork already does this.
+      className="relative flex w-10 shrink-0 items-start self-stretch pt-11"
       aria-hidden="true"
     >
       <svg
