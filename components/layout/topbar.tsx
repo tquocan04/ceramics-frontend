@@ -16,6 +16,8 @@ import {
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Popover,
   PopoverContent,
@@ -46,6 +48,12 @@ export function Topbar({ title }: { title: string }) {
 
   return (
     <header className="border-border bg-background/80 flex h-14 shrink-0 items-center gap-3 border-b px-4 backdrop-blur">
+      {/* Left of the title, per the shadcn convention — keeps the right-hand
+          cluster at its four buttons. Visible at every width, because below md
+          the sidebar becomes a Sheet and this is the only way to open it. */}
+      <SidebarTrigger className="-ml-1 shrink-0" />
+      <Separator orientation="vertical" className="h-4 shrink-0" />
+
       <h1 className="truncate text-sm font-semibold tracking-tight">{title}</h1>
 
       <div className="ml-auto flex items-center gap-1.5">

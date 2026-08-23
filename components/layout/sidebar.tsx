@@ -11,8 +11,19 @@ import {
   Send,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar"
 
 const NAV = [
   { href: "/board", label: "Bảng sản xuất", icon: LayoutGrid },
@@ -22,66 +33,99 @@ const NAV = [
   { href: "/notifications", label: "Thông báo", icon: Send },
 ] as const
 
-export function Sidebar() {
+/**
+ * Collapses to an icon rail rather than disappearing, so navigation stays
+ * reachable when the board wants the width. Every menu button carries a
+ * `tooltip`, which shadcn reveals only while collapsed.
+ *
+ * Named AppSidebar because `Sidebar` is shadcn's primitive.
+ */
+export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="bg-sidebar border-sidebar-border hidden w-56 shrink-0 flex-col border-r md:flex">
-      <div className="flex h-14 items-center gap-2.5 px-4">
-        <KilnMark />
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold tracking-tight">
-            Xưởng Gốm
-          </div>
-          <div className="text-muted-foreground truncate text-[11px]">
-            Điều phối sản xuất
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 pb-3">
-        <Button
-          render={<Link href="/orders/new" />}
-          // Base UI needs telling that the rendered element is an anchor, not
-          // a native <button>.
-          nativeButton={false}
-          size="sm"
-          className="w-full justify-start gap-2"
-        >
-          <Plus />
-          Tạo đơn hàng
-        </Button>
-      </div>
-
-      <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active =
-            pathname === href || (href !== "/board" && pathname.startsWith(href))
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
-                active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-              )}
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              tooltip="Xưởng Gốm — Điều phối sản xuất"
+              render={<Link href="/board" />}
             >
-              <Icon className="size-4 shrink-0" />
-              <span className="truncate">{label}</span>
-            </Link>
-          )
-        })}
-      </nav>
+              <KilnMark />
+              <div className="grid min-w-0 flex-1 leading-tight">
+                <span className="truncate text-sm font-semibold tracking-tight">
+                  Xưởng Gốm
+                </span>
+                <span className="text-muted-foreground truncate text-[11px]">
+                  Điều phối sản xuất
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      <div className="text-muted-foreground border-sidebar-border border-t px-4 py-3 text-[11px] leading-relaxed">
-        Dữ liệu đang chạy trên{" "}
-        <span className="text-foreground font-medium">mock API</span> nội bộ.
-        Đổi <code className="text-[10px]">NEXT_PUBLIC_API_BASE_URL</code> để trỏ
-        sang backend thật.
-      </div>
-    </aside>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Tạo đơn hàng"
+                  // The one primary action, so it keeps a filled treatment and
+                  // still reads as a button at 32px in the icon rail.
+                  className="bg-primary text-primary-foreground hover:bg-primary/85 hover:text-primary-foreground active:bg-primary/85 active:text-primary-foreground"
+                  render={<Link href="/orders/new" />}
+                >
+                  <Plus />
+                  <span>Tạo đơn hàng</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Điều hướng</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV.map(({ href, label, icon: Icon }) => {
+                const active =
+                  pathname === href ||
+                  (href !== "/board" && pathname.startsWith(href))
+
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton
+                      isActive={active}
+                      tooltip={label}
+                      render={<Link href={href} />}
+                    >
+                      <Icon />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <p className="text-muted-foreground px-2 text-[11px] leading-relaxed group-data-[collapsible=icon]:hidden">
+          Dữ liệu đang chạy trên{" "}
+          <span className="text-foreground font-medium">mock API</span> nội bộ.
+          Đổi <code className="text-[10px]">NEXT_PUBLIC_API_BASE_URL</code> để
+          trỏ sang backend thật.
+        </p>
+      </SidebarFooter>
+
+      {/* Drag/click edge for toggling, alongside the Topbar trigger. */}
+      <SidebarRail />
+    </Sidebar>
   )
 }
 

@@ -5,9 +5,10 @@
  * Rule 6). Keeping them visible below the board rather than hidden in a filter
  * is deliberate — a blocked batch is the thing a manager most needs to see.
  *
- * A fixed 5x2 grid of compact tiles, newest first. Ten slots is the whole dock:
- * it never scrolls and never changes height, so a pile-up can never eat the
- * board. Anything past ten lives on /rework.
+ * Two rows of compact tiles, newest first. The column count is measured from
+ * the space actually available, so the dock gains columns when the sidebar or
+ * event rail collapse. It never scrolls and never changes height, so a pile-up
+ * can never eat the board; anything past `cols * 2` lives on /rework.
  */
 
 import Link from "next/link"
@@ -21,12 +22,25 @@ import {
 } from "@/components/batches/rework-card"
 import { PriorityChip, RiskText } from "@/components/batches/status-chip"
 import { Button } from "@/components/ui/button"
+import { useElementWidth } from "@/hooks/use-element-width"
 import { formatDeadlineDistance } from "@/lib/domain/deadline"
 import type { BatchCardView } from "@/lib/domain/types"
 import { cn } from "@/lib/utils"
 
-/** 5 columns x 2 rows. */
-const VISIBLE = 10
+/** Tile sizing, in px. MIN drives the column count, MAX caps how wide a tile
+ *  may grow when there is spare room. GAP must match the grid's `gap-2`. */
+const MIN_TILE = 208 // 13rem
+const MAX_TILE = 288 // 18rem
+const GAP = 8
+
+/** Two rows, always — the dock's height must never move. */
+const ROWS = 2
+
+/** Columns that fit the measured width, before accounting for item count. */
+function columnsFor(width: number): number {
+  if (width <= 0) return 5 // pre-measurement default, corrected on first frame
+  return Math.max(1, Math.floor((width + GAP) / (MIN_TILE + GAP)))
+}
 
 export function ReworkTray({
   batches,
@@ -38,9 +52,14 @@ export function ReworkTray({
   onResolved: () => void
 }) {
   const { unblock, busyId } = useUnblockBatch(onResolved)
+  const [gridRef, width] = useElementWidth<HTMLDivElement>()
 
   const empty = batches.length === 0
-  const visible = batches.slice(0, VISIBLE)
+
+  // Collapse unused columns so a couple of batches read as deliberate tiles
+  // rather than two stragglers in a five-wide grid.
+  const cols = Math.min(columnsFor(width), Math.max(1, batches.length))
+  const visible = batches.slice(0, cols * ROWS)
   const hidden = batches.length - visible.length
 
   return (
@@ -77,8 +96,20 @@ export function ReworkTray({
       </div>
 
       {!empty && (
-        <div className="border-status-rework/30 bg-status-rework/[0.03] rounded-lg border border-dashed p-2">
-          <div className="grid grid-cols-5 gap-2">
+        <div
+          ref={gridRef}
+          className="border-status-rework/30 bg-status-rework/[0.03] rounded-lg border border-dashed p-2"
+        >
+          <div
+            className="grid gap-2"
+            style={{
+              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              // Capping the GRID (not each tile) is what makes tiles grow into
+              // spare room yet stay adjacent: the leftover width falls to the
+              // right of the grid instead of being spread between tracks.
+              maxWidth: cols * MAX_TILE + (cols - 1) * GAP,
+            }}
+          >
             <AnimatePresence mode="popLayout">
               {visible.map((batch) => (
                 <ReworkTile
