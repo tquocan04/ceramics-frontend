@@ -128,3 +128,125 @@
     @apply font-sans;
   }
 }
+/* ─────────────────────────────────────────────────────────────────────────
+   Ceramics pipeline — stage, status and deadline-risk tokens
+   Stage hues are drawn from the craft: wet clay, sand, cobalt (men lam),
+   celadon, kiln fire, inspection violet, packing green.
+   Kept separate from status colors so a BLOCKED FIRING card is unambiguous.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-stage-forming: var(--stage-forming);
+  --color-stage-drying: var(--stage-drying);
+  --color-stage-decorating: var(--stage-decorating);
+  --color-stage-glazing: var(--stage-glazing);
+  --color-stage-firing: var(--stage-firing);
+  --color-stage-qc: var(--stage-qc);
+  --color-stage-packaging: var(--stage-packaging);
+
+  --color-risk-on-track: var(--risk-on-track);
+  --color-risk-at-risk: var(--risk-at-risk);
+  --color-risk-overdue: var(--risk-overdue);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-progress: var(--status-progress);
+  --color-status-completed: var(--status-completed);
+  --color-status-failed: var(--status-failed);
+  --color-status-blocked: var(--status-blocked);
+  --color-status-rework: var(--status-rework);
+
+  --animate-flow-dash: flow-dash 1.2s linear infinite;
+  --animate-breathe: breathe 2.6s ease-in-out infinite;
+  --animate-shake: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  --animate-pulse-ring: pulse-ring 1.8s ease-out infinite;
+}
+
+:root {
+  /* light mode: darker + saturated so they hold against white */
+  --stage-forming: oklch(0.52 0.08 55);
+  --stage-drying: oklch(0.60 0.12 78);
+  --stage-decorating: oklch(0.50 0.17 255);
+  --stage-glazing: oklch(0.55 0.10 185);
+  --stage-firing: oklch(0.58 0.19 45);
+  --stage-qc: oklch(0.52 0.18 300);
+  --stage-packaging: oklch(0.53 0.14 150);
+
+  --risk-on-track: oklch(0.53 0.14 150);
+  --risk-at-risk: oklch(0.62 0.14 80);
+  --risk-overdue: oklch(0.55 0.20 25);
+
+  --status-pending: oklch(0.56 0.021 213.5);
+  --status-progress: oklch(0.58 0.19 45);
+  --status-completed: oklch(0.53 0.14 150);
+  --status-failed: oklch(0.55 0.20 25);
+  --status-blocked: oklch(0.50 0.19 20);
+  --status-rework: oklch(0.62 0.14 80);
+}
+
+.dark {
+  /* dark mode: lifted lightness so the flow lines luminesce on slate */
+  --stage-forming: oklch(0.70 0.09 55);
+  --stage-drying: oklch(0.80 0.13 78);
+  --stage-decorating: oklch(0.68 0.16 255);
+  --stage-glazing: oklch(0.75 0.11 185);
+  --stage-firing: oklch(0.72 0.19 45);
+  --stage-qc: oklch(0.70 0.16 300);
+  --stage-packaging: oklch(0.72 0.15 150);
+
+  --risk-on-track: oklch(0.72 0.15 150);
+  --risk-at-risk: oklch(0.80 0.14 80);
+  --risk-overdue: oklch(0.68 0.20 25);
+
+  --status-pending: oklch(0.723 0.014 214.4);
+  --status-progress: oklch(0.72 0.19 45);
+  --status-completed: oklch(0.72 0.15 150);
+  --status-failed: oklch(0.68 0.20 25);
+  --status-blocked: oklch(0.64 0.21 20);
+  --status-rework: oklch(0.80 0.14 80);
+
+  /* the stock chart ramp is identical in both themes and reads too dark
+     on this canvas — relift it here */
+  --chart-1: oklch(0.72 0.19 45);
+  --chart-2: oklch(0.68 0.16 255);
+  --chart-3: oklch(0.75 0.11 185);
+  --chart-4: oklch(0.70 0.16 300);
+  --chart-5: oklch(0.72 0.15 150);
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

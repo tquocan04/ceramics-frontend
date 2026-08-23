@@ -3337,6 +3337,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^13.1.1":
+  version: 13.1.1
+  resolution: "framer-motion@npm:13.1.1"
+  dependencies:
+    motion-dom: "npm:^13.1.1"
+    motion-utils: "npm:^13.0.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/db1601442047bbd06286ef9fd5c9af06b4530984dc0cd0f77dffa8590a8dbcac92db05e992b62041455b55db6791bdfba8cd7c0aaa920a2325eba2c277fb7baa
+  languageName: node
+  linkType: hard
+
 "fresh@npm:^2.0.0":
   version: 2.0.0
   resolution: "fresh@npm:2.0.0"
@@ -3358,10 +3377,14 @@ __metadata:
     eslint: "npm:^9"
     eslint-config-next: "npm:16.3.2"
     lucide-react: "npm:^1.33.0"
+    motion: "npm:^13.1.1"
     next: "npm:16.3.2"
+    next-themes: "npm:^0.4.6"
     react: "npm:19.2.8"
     react-dom: "npm:19.2.8"
+    server-only: "npm:^0.0.1"
     shadcn: "npm:^4.19.0"
+    sonner: "npm:^2.0.8"
     tailwind-merge: "npm:^3.6.0"
     tailwindcss: "npm:^4"
     tw-animate-css: "npm:^1.4.0"
@@ -4660,6 +4683,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion-dom@npm:^13.1.1":
+  version: 13.1.1
+  resolution: "motion-dom@npm:13.1.1"
+  dependencies:
+    motion-utils: "npm:^13.0.0"
+  checksum: 10c0/c7697e6937920f9f584c04d59fe8589e7bbca18a85d2cf1ec7cf4ee229fb29054dda41bec6db2dde4fdf43436f17cfc2a3bbab06d2d9f8232dfa7921e0382d20
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "motion-utils@npm:13.0.0"
+  checksum: 10c0/4b279ce85f71926d668ff5966feb898b174541d16952a61c7150982388553266602ecd2a76e057530076ff8f38d06672e585639ddc73c41dd1a67d04aaa3662d
+  languageName: node
+  linkType: hard
+
+"motion@npm:^13.1.1":
+  version: 13.1.1
+  resolution: "motion@npm:13.1.1"
+  dependencies:
+    framer-motion: "npm:^13.1.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/e02155269114c3757e1bf73abb2d5dd58cbb47f5f60465690e78ed94152e21b14a94680a6be29299b8d5fc8df34a5d78167e7948e2d2b849b55c26ad58690eb6
+  languageName: node
+  linkType: hard
+
 "ms@npm:^2.1.1, ms@npm:^2.1.3":
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
@@ -4698,6 +4755,16 @@ __metadata:
   dependencies:
     content-type: "npm:^2.1.0"
   checksum: 10c0/656fa57de02f1a0c4c09f9e17eb78e8182547c07093e810ff8f16249b6ae31f2c546a3d457905e94f3276b25f0e2741ea1a3bc3912192932ed7e493adfea535e
+  languageName: node
+  linkType: hard
+
+"next-themes@npm:^0.4.6":
+  version: 0.4.6
+  resolution: "next-themes@npm:0.4.6"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
+  checksum: 10c0/83590c11d359ce7e4ced14f6ea9dd7a691d5ce6843fe2dc520fc27e29ae1c535118478d03e7f172609c41b1ef1b8da6b8dd2d2acd6cd79cac1abbdbd5b99f2c4
   languageName: node
   linkType: hard
 
@@ -5570,6 +5637,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"server-only@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "server-only@npm:0.0.1"
+  checksum: 10c0/4704f0ef85da0be981af6d4ed8e739d39bcfd265b9c246a684060acda5642d0fdc6daffc2308e71e2682c5f508090978802eae0a77623c9b90a49f9ae68048d6
+  languageName: node
+  linkType: hard
+
 "set-function-length@npm:^1.2.2":
   version: 1.2.2
   resolution: "set-function-length@npm:1.2.2"
@@ -5846,6 +5920,20 @@ __metadata:
     ip-address: "npm:^10.1.1"
     smart-buffer: "npm:^4.2.0"
   checksum: 10c0/2d4350c31142b0931eb1758825b426bcbf4bfb5eed682ca48bc46dc9e7d1930ec366ea574ad49fc6c1fd9e9e17ce243be0ef13e31fc4b0319d9093f1fb19743c
+  languageName: node
+  linkType: hard
+
+"sonner@npm:^2.0.8":
+  version: 2.0.8
+  resolution: "sonner@npm:2.0.8"
+  peerDependencies:
+    "@types/react": ^18.0.0 || ^19.0.0
+    react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/cc271f78dca7e7d7ce34a724883f3292ba671b5ed3d41732430df28c38a8f6a47e8e59da5fdd0b258ac07136db0cdaf02f8cda9afb9cc9f12d81b6c319b427f7
   languageName: node
   linkType: hard
 
