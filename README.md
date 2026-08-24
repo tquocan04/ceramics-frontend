@@ -21,8 +21,8 @@ Mẻ sản xuất  →  FORMING → DRYING → DECORATING → GLAZING → FIRING
 > scaffold only, so cloning and staying on `main` will **not** give you a runnable app.
 >
 > ```bash
-> git clone https://github.com/quanpham8899/de-tai-2-frontend.git
-> cd de-tai-2-frontend
+> git clone https://github.com/tquocan04/ceramics-frontend.git
+> cd ceramics-frontend
 > git switch demo/ceremic-manifacture-automation-pipeline
 > ```
 >
