@@ -1,4 +1,4 @@
-# Hệ Thống Điều Phối & Giám Sát Quy Trình Sản Xuất Xưởng Gốm
+# Ceramics Pipeline — Frontend
 
 Frontend for the ceramics manufacturing pipeline — a workflow orchestration system for a pottery
 workshop. Orders arrive as free-form Vietnamese text, get parsed into structured production specs,
