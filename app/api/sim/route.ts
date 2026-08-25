@@ -5,17 +5,30 @@
 
 import { handle, readJson } from "@/lib/mock/http"
 import { db, resetDb, type AIFailureMode } from "@/lib/mock/db"
-import { setSimulator, setSimulatorSpeed } from "@/lib/mock/simulator"
+import {
+  resetSimulatorMemory,
+  setSimulator,
+  setSimulatorSpeed,
+} from "@/lib/mock/simulator"
+import { clearTelegramQueue } from "@/lib/mock/telegram"
 import { seedIfEmpty } from "@/lib/mock/seed"
 import { publish } from "@/lib/mock/bus"
 
 export const dynamic = "force-dynamic"
 
 interface SimBody {
-  action?: "play" | "pause" | "speed" | "reset" | "ai_failure" | "notify_failure"
+  action?:
+    | "play"
+    | "pause"
+    | "speed"
+    | "reset"
+    | "ai_failure"
+    | "notify_failure"
+    | "telegram"
   speed?: number
   mode?: AIFailureMode
   rate?: number
+  enabled?: boolean
 }
 
 export async function GET() {
@@ -44,7 +57,15 @@ export async function POST(request: Request) {
           Math.max(0, Number(body.rate ?? 0))
         )
         break
+      case "telegram":
+        db.config.telegramEnabled = body.enabled === true
+        if (!db.config.telegramEnabled) clearTelegramQueue()
+        break
       case "reset":
+        // Drop anything still queued for the old data set, or the drain loop
+        // would settle rows that no longer exist.
+        clearTelegramQueue()
+        resetSimulatorMemory()
         resetDb()
         seedIfEmpty()
         publish({ kind: "invalidate", scope: "all" })
