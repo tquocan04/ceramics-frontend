@@ -10,8 +10,10 @@ type Ctx = { params: Promise<{ id: string }> }
 
 export async function POST(_request: Request, ctx: Ctx) {
   const { id } = await ctx.params
-  return handle(() => {
-    const notification = retryNotification(id)
+  return handle(async () => {
+    // Must be awaited: delivery is asynchronous now, and an unawaited promise
+    // is always truthy — the 404 below would never fire.
+    const notification = await retryNotification(id)
     if (!notification) {
       throw new DomainError(ERROR_CODE.NOTIFICATION_SEND_FAILED, 404)
     }
