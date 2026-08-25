@@ -70,6 +70,8 @@ export interface SimConfig {
   notificationFailureRate: number
   simulatorRunning: boolean
   simulatorSpeed: number
+  /** Whether notifications really go to Telegram via the backend. */
+  telegramEnabled: boolean
 }
 
 export interface QCSubmitInput {
