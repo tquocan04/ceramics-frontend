@@ -6,6 +6,7 @@ import {
   FlaskConical,
   Gauge,
   Moon,
+  Send,
   PanelRightClose,
   PanelRightOpen,
   Pause,
@@ -24,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   Select,
   SelectContent,
@@ -197,8 +199,36 @@ function SimulatorControls() {
           </div>
 
           <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Send className="size-3" />
+                Gửi Telegram thật (qua backend)
+              </Label>
+              <Switch
+                size="sm"
+                checked={config?.telegramEnabled ?? false}
+                onCheckedChange={(enabled) =>
+                  send(
+                    { action: "telegram", enabled },
+                    enabled
+                      ? "Đang gửi thật vào nhóm Telegram"
+                      : "Đã chuyển về gửi mô phỏng"
+                  )
+                }
+              />
+            </div>
+            <p className="text-muted-foreground text-[11px] leading-relaxed">
+              Khi bật, mỗi công đoạn hoàn thành và mỗi sự cố sẽ được đẩy vào
+              nhóm Telegram thật qua{" "}
+              <span className="font-mono">POST /api/notifications/trigger</span>{" "}
+              của backend. Hàng đợi giới hạn ~1 tin mỗi 3,5 giây; cảnh báo được
+              ưu tiên gửi trước.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
             <Label className="text-xs">
-              Tỉ lệ lỗi gửi Telegram (Scenario E) —{" "}
+              Tỉ lệ lỗi gửi mô phỏng (Scenario E) —{" "}
               {Math.round((config?.notificationFailureRate ?? 0) * 100)}%
             </Label>
             <div className="flex gap-1">
@@ -216,6 +246,10 @@ function SimulatorControls() {
                 </Button>
               ))}
             </div>
+            <p className="text-muted-foreground text-[11px] leading-relaxed">
+              Chỉ áp dụng cho đường gửi mô phỏng, không ảnh hưởng khi bật gửi
+              Telegram thật.
+            </p>
           </div>
 
           <Button

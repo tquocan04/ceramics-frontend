@@ -64,6 +64,12 @@ export function NotificationOutbox() {
       const updated = await retryNotification(n.id)
       if (updated.status === NOTIFICATION_STATUS.SENT) {
         toast.success("Đã gửi lại thành công")
+      } else if (updated.status === NOTIFICATION_STATUS.PENDING) {
+        // Real sends go through a paced queue, so the verdict is not known
+        // yet — it arrives over the stream and re-renders this list.
+        toast.info("Đã đưa vào hàng đợi gửi lại", {
+          description: "Kết quả sẽ cập nhật khi hàng đợi Telegram xử lý xong.",
+        })
       } else {
         toast.error("Gửi lại vẫn thất bại", {
           description: updated.error_message ?? undefined,
