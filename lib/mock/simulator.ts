@@ -13,41 +13,81 @@ import "server-only"
 
 import {
   BATCH_STATUS,
+  DEADLINE_RISK,
+  EVENT_TYPE,
   QC_RESULT,
   STAGE_STATUS,
   STAGE_TYPE,
 } from "@/lib/domain/enums"
 import { DomainError } from "@/lib/domain/errors"
 import { DEFECT_TYPE } from "@/lib/domain/enums"
+import { deadlineRisk } from "@/lib/domain/deadline"
+import { STAGE_LABEL } from "@/lib/domain/labels"
 
 import { db, getStages } from "./db"
+import { recordEvent } from "./events"
 import {
   analyzeOrder,
   completeStage,
   confirmOrder,
   createOrder,
+  failStage,
   listBatches,
   startStage,
   submitQC,
 } from "./services"
 import { EXAMPLE_ORDERS } from "./ai"
 
-const TICK_MS = 4000
+/**
+ * Base tick interval at 1x speed. Halved in pace from the original 4s: a
+ * transition every four seconds read as frantic on screen, and — now that
+ * completions reach a real Telegram chat — produced more traffic than a human
+ * can follow.
+ */
+const TICK_MS = 8000
 
 /** Minimum dwell time before a running stage may finish, in ms. */
-const MIN_DWELL_MS = 9000
+const MIN_DWELL_MS = 18000
 
 /** Keep at least this many batches on the board by injecting new orders. */
-const MIN_ACTIVE_BATCHES = 6
+const MIN_ACTIVE_BATCHES = 4
+
+/**
+ * Chance that a tick which could complete a stage instead fails it.
+ *
+ * Without this the simulator can never produce a sự cố on its own — QC defects
+ * are random, but STAGE_FAILED only ever came from a human pressing the button
+ * or from the seed. The alert path needs a source if it is to be demonstrable.
+ */
+const FAILURE_CHANCE = 0.03
+
+/** Plausible workshop faults, for the generated sự cố. */
+const FAILURE_REASONS = [
+  "Nhiệt độ lò tụt dưới ngưỡng cho phép",
+  "Men bị vón cục, không đạt độ mịn",
+  "Mộc nứt trong quá trình sấy",
+  "Khuôn tạo hình bị lệch trục",
+  "Mất điện đột ngột giữa công đoạn",
+  "Nguyên liệu đất sét không đạt độ ẩm yêu cầu",
+]
 
 const GLOBAL_KEY = Symbol.for("ceramics.mock.simulator")
 
+interface SimState {
+  timer: ReturnType<typeof setInterval> | null
+  /** Batches already warned about their deadline, so we warn only once each. */
+  warnedDeadlines: Set<string>
+}
+
 type GlobalWithSim = typeof globalThis & {
-  [GLOBAL_KEY]?: { timer: ReturnType<typeof setInterval> | null }
+  [GLOBAL_KEY]?: SimState
 }
 
 const g = globalThis as GlobalWithSim
-const state = (g[GLOBAL_KEY] ??= { timer: null })
+const state: SimState = (g[GLOBAL_KEY] ??= {
+  timer: null,
+  warnedDeadlines: new Set(),
+})
 
 function pick<T>(items: T[]): T | undefined {
   if (items.length === 0) return undefined
@@ -69,6 +109,12 @@ function tick(): void {
     topUpBoard()
   } catch {
     // Never let board top-up kill the loop.
+  }
+
+  try {
+    sweepDeadlines()
+  } catch {
+    // Nor let the deadline sweep kill it.
   }
 
   const candidates = listBatches().filter(
@@ -100,6 +146,10 @@ function tick(): void {
     if (active && dwellElapsed(active.started_at, speed)) {
       if (active.stage_type === STAGE_TYPE.QUALITY_CHECK) {
         runQC(batch.id, batch.quantity)
+      } else if (Math.random() < FAILURE_CHANCE) {
+        // The stage breaks instead of finishing: batch goes BLOCKED and a
+        // CRITICAL alert goes out. QC has its own failure path already.
+        failStage(batch.id, active.stage_type, pick(FAILURE_REASONS)!)
       } else {
         completeStage(batch.id, active.stage_type)
       }
@@ -116,6 +166,47 @@ function tick(): void {
     // A rejected transition is a legitimate outcome, not a crash. Anything
     // else would be a bug worth surfacing in the server log.
     if (!(e instanceof DomainError)) throw e
+  }
+}
+
+/**
+ * Emit DEADLINE_WARNING the first time a batch drifts off track.
+ *
+ * Deadline risk was previously derived for display only and never recorded, so
+ * the event type existed without ever firing. Once per batch is the point —
+ * a batch stays at risk for its whole remaining life, and re-announcing that
+ * every tick is precisely the noise this change set exists to remove.
+ */
+function sweepDeadlines(): void {
+  for (const batch of listBatches()) {
+    if (
+      batch.status !== BATCH_STATUS.PENDING &&
+      batch.status !== BATCH_STATUS.IN_PRODUCTION
+    ) {
+      continue
+    }
+    if (state.warnedDeadlines.has(batch.id)) continue
+
+    const risk = deadlineRisk(
+      batch.deadline,
+      batch.current_stage,
+      Date.now(),
+      batch.quantity
+    )
+    if (risk === DEADLINE_RISK.ON_TRACK) continue
+
+    state.warnedDeadlines.add(batch.id)
+    recordEvent({
+      event_type: EVENT_TYPE.DEADLINE_WARNING,
+      batch_id: batch.id,
+      order_id: batch.order_id,
+      stage: batch.current_stage,
+      message:
+        risk === DEADLINE_RISK.OVERDUE
+          ? `Mẻ ${batch.batch_code} đã trễ hạn tại ${STAGE_LABEL[batch.current_stage]}`
+          : `Mẻ ${batch.batch_code} có nguy cơ trễ hạn tại ${STAGE_LABEL[batch.current_stage]}`,
+      metadata: { deadline_risk: risk, deadline: batch.deadline },
+    })
   }
 }
 
@@ -170,11 +261,26 @@ function topUpBoard(): void {
   if (analysis.is_valid) confirmOrder(order.id)
 }
 
-export function ensureSimulator(): void {
-  if (state.timer) return
-  state.timer = setInterval(tick, TICK_MS)
+/**
+ * (Re)create the interval at the current speed.
+ *
+ * Speed used to scale only the dwell threshold while the tick stayed pinned at
+ * 4s, which capped throughput at one transition per tick no matter what the
+ * user picked — 0.5x did not actually halve anything. Scaling the interval too
+ * makes the control mean what it says.
+ */
+function restartTimer(): void {
+  if (state.timer) clearInterval(state.timer)
+
+  const speed = Math.min(8, Math.max(0.25, db.config.simulatorSpeed))
+  state.timer = setInterval(tick, Math.round(TICK_MS / speed))
   // Do not hold the process open on account of the demo loop.
   state.timer.unref?.()
+}
+
+export function ensureSimulator(): void {
+  if (state.timer) return
+  restartTimer()
 }
 
 export function setSimulator(running: boolean): void {
@@ -183,6 +289,7 @@ export function setSimulator(running: boolean): void {
 
 export function setSimulatorSpeed(speed: number): void {
   db.config.simulatorSpeed = Math.min(8, Math.max(0.25, speed))
+  if (state.timer) restartTimer()
 }
 
 export function stopSimulator(): void {
@@ -190,4 +297,9 @@ export function stopSimulator(): void {
     clearInterval(state.timer)
     state.timer = null
   }
+}
+
+/** Forget deadline warnings, so a reset demo can warn about them again. */
+export function resetSimulatorMemory(): void {
+  state.warnedDeadlines.clear()
 }

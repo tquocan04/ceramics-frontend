@@ -39,6 +39,12 @@ export interface MockConfig {
   /** Simulator tick multiplier. */
   simulatorSpeed: number
   /**
+   * Whether notifications are really posted to Telegram through the backend.
+   * Defaults from TELEGRAM_NOTIFY_ENABLED and is off unless asked for, so a
+   * dev server can never surprise the real group.
+   */
+  telegramEnabled: boolean
+  /**
    * Deliver notifications synchronously instead of on the next tick. Used
    * only while seeding, so the seeded outbox is settled before we backdate it.
    */
@@ -79,6 +85,7 @@ function createDb(): Db {
       notificationFailureRate: 0,
       simulatorRunning: true,
       simulatorSpeed: 1,
+      telegramEnabled: process.env.TELEGRAM_NOTIFY_ENABLED === "true",
       syncNotifications: false,
     },
     seeded: false,
