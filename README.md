@@ -1,4 +1,4 @@
-# Hệ Thống Điều Phối & Giám Sát Quy Trình Sản Xuất Xưởng Gốm
+# Ceramics Pipeline — Frontend
 
 Frontend for the ceramics manufacturing pipeline — a workflow orchestration system for a pottery
 workshop. Orders arrive as free-form Vietnamese text, get parsed into structured production specs,
@@ -21,8 +21,8 @@ Mẻ sản xuất  →  FORMING → DRYING → DECORATING → GLAZING → FIRING
 > scaffold only, so cloning and staying on `main` will **not** give you a runnable app.
 >
 > ```bash
-> git clone https://github.com/quanpham8899/de-tai-2-frontend.git
-> cd de-tai-2-frontend
+> git clone https://github.com/tquocan04/ceramics-frontend.git
+> cd ceramics-frontend
 > git switch demo/ceremic-manifacture-automation-pipeline
 > ```
 >
